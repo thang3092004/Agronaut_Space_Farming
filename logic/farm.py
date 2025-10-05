@@ -23,7 +23,8 @@ def ensure_farm_state():
         ss.seed_inventory = {"HydroCorn": 8, "EcoMoss": 10, "LuxiBerry": 6}
     ss.setdefault("seed_max", {"HydroCorn": 25, "EcoMoss": 30, "LuxiBerry": 20})
     ss.setdefault("money", 5)  # starting credits
-    ss.setdefault("hunger", 50)
+    ss.setdefault("hunger_max", 200)
+    ss.setdefault("hunger", 200)
     ss.setdefault("day", 1)
     ss.setdefault("xp", 0)
     ss.setdefault("harvested_total", 0)
@@ -334,7 +335,7 @@ def next_day():
         for j in range(5):
             _tick_cell(st.session_state.farm_grid[i][j])
     # Hunger decay
-    st.session_state.hunger = max(0, st.session_state.hunger - 8)
+        st.session_state.hunger = max(0, st.session_state.hunger - 8)
     # Rain to water conversion (B) - if rain high add inventory water
     rain_amount = st.session_state.weather_today.get("rain",0)
     if rain_amount >= 0.6:

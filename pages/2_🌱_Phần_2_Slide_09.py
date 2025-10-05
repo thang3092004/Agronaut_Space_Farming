@@ -63,4 +63,4 @@ with nav[2]:
 with nav[3]:
     if st.button("🔁 Restart", use_container_width=True):
                 from logic.farm import reset_game
-                reset_game(); st.experimental_rerun()
+                reset_game(); st.rerun()

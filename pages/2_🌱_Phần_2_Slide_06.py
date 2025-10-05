@@ -91,7 +91,7 @@ with st.container():
               <div class='badge'>🍎 {ss.inventory.get('food',0)}</div>
               <div class='badge'>💰 {ss.money}</div>
               <div class='badge'>⭐ {ss.xp}</div>
-              <div class='badge {'critical' if ss.hunger==0 else ''}'>🍽️ {ss.hunger}/100</div>
+              <div class='badge {'critical' if ss.hunger==0 else ''}'>🍽️ {ss.hunger}/{ss.hunger_max}</div>
               <div class='badge'>🌵 Drought: {ss.weather_today.get('drought',0)}</div>
               <div class='badge'>🌡️ {ss.weather_today.get('temp','?')}°C</div>
               <div class='badge'>🌧️ {ss.weather_today.get('rain','?')}</div>
@@ -116,7 +116,7 @@ with col_main:
         cgo = st.columns([1,1,1])
         with cgo[1]:
             if st.button("🔄 Restart", type="primary"):
-                reset_game(); st.experimental_rerun()
+                reset_game(); st.rerun()
     else:
         nxt_cols = st.columns([1,1,1])
         with nxt_cols[0]:
@@ -128,6 +128,8 @@ with col_main:
         with nxt_cols[2]:
             if st.button("📊 Achievements", use_container_width=True):
                 st.switch_page("pages/2_🌱_Phần_2_Slide_09.py")
+        # Hunger progress bar
+        st.progress(min(1.0, ss.hunger/ss.hunger_max))
     if hun_streak>0 and not ss.get("game_over"):
         st.info(f"⚠️ Hunger 0 for {hun_streak} consecutive day(s) (>=3 = loss)")
 
