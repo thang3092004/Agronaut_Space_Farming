@@ -26,6 +26,8 @@ def ensure_farm_state():
     ss.setdefault("hunger_max", 200)
     ss.setdefault("hunger", 200)
     ss.setdefault("day", 1)
+    # Hunger tuning parameters
+    ss.setdefault("hunger_decay", 8)  # was 5, increase to make hunger drop faster
     ss.setdefault("xp", 0)
     ss.setdefault("harvested_total", 0)
     ss.setdefault("hunger_zero_streak", 0)
@@ -86,6 +88,11 @@ def render_grid():
     st.info(f"Selected cell: ({i+1},{j+1}) → {ss.farm_grid[i][j]}")
 
 def sidebar_actions():
+    # Optional: allow player to adjust hunger rate (for balancing / debug)
+    with st.expander("⚙️ Game Tuning", expanded=False):
+        hd = st.slider("Hunger decay per day", 4, 15, st.session_state.get("hunger_decay",8), 1, key="_hdec_slider")
+        st.session_state.hunger_decay = hd
+        st.caption(f"Current hunger decay: {hd}/day (max hunger {st.session_state.hunger_max})")
     # Resource / action sidebar
     st.subheader("🎒 Resources")
     col1, col2 = st.columns(2)
@@ -380,7 +387,8 @@ def next_day():
         for j in range(5):
             _tick_cell(st.session_state.farm_grid[i][j])
     # Hunger decay
-    st.session_state.hunger = max(0, st.session_state.hunger - 5)
+    decay = st.session_state.get("hunger_decay", 8)
+    st.session_state.hunger = max(0, st.session_state.hunger - decay)
     # Rain to water conversion (B) - if rain high add inventory water
     rain_amount = st.session_state.weather_today.get("rain",0)
     if rain_amount >= 0.6:
