@@ -172,10 +172,16 @@ with col_side:
             else: st.error("No food to sell")
     a5,a6 = st.columns(2)
     with a5:
-        if st.button("🍽️ Eat 1", use_container_width=True):
+        if st.button("🍽️ Eat 1 (+25)", use_container_width=True):
             if ss.inventory.get("food",0)>0:
-                ss.inventory["food"]-=1; ss.hunger=min(100, ss.hunger+15); st.success("Ate")
-            else: st.error("No food")
+                ss.inventory["food"] -= 1
+                cap = ss.get("hunger_max", 200)
+                before = ss.hunger
+                ss.hunger = min(cap, ss.hunger + 25)
+                gained = ss.hunger - before
+                st.success(f"Ate (+{gained} hunger)")
+            else:
+                st.error("No food")
     with a6:
         st.metric("XP", ss.xp)
 
