@@ -23,8 +23,8 @@ def ensure_farm_state():
         ss.seed_inventory = {"HydroCorn": 8, "EcoMoss": 10, "LuxiBerry": 6}
     ss.setdefault("seed_max", {"HydroCorn": 25, "EcoMoss": 30, "LuxiBerry": 20})
     ss.setdefault("money", 5)  # starting credits
-    ss.setdefault("hunger_max", 300)
-    ss.setdefault("hunger", 300)
+    ss.setdefault("hunger_max", 200)
+    ss.setdefault("hunger", 200)
     ss.setdefault("day", 1)
     ss.setdefault("xp", 0)
     ss.setdefault("harvested_total", 0)
@@ -181,7 +181,8 @@ def sidebar_actions():
         food = st.session_state.inventory.get("food",0)
         if food>0:
             st.session_state.inventory["food"] = food-1
-            st.session_state.hunger = min(300, st.session_state.hunger+25)
+            # Cap at new hunger_max (200)
+            st.session_state.hunger = min(st.session_state.get("hunger_max",200), st.session_state.hunger+25)
             st.toast("Hunger restored")
         else:
             st.error("No food available.")
