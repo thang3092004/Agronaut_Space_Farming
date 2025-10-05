@@ -1,0 +1,21 @@
+{
+  "HydroCorn": {
+    "water_need": 2,
+    "yield": 3,
+    "price": 1,
+    "grow_days": 4
+  },
+  "EcoMoss": {
+    "water_need": 1,
+    "yield": 1,
+    "price": 1,
+    "grow_days": 3,
+    "humidify": 0.2
+  },
+  "LuxiBerry": {
+    "water_need": 2,
+    "yield": 1,
+    "price": 4,
+    "grow_days": 5
+  }
+}

@@ -1,0 +1,10 @@
+html, body, .stApp { background: radial-gradient(80% 80% at 50% 10%, #2a1e55 0%, #120e22 60%, #0a0814 100%) !important; }
+h1, h2, h3, .stMarkdown, .stButton button, .stMetric, .stCaption {
+  color: #e7e8ff !important;
+  text-shadow: 0 0 6px rgba(107,75,255,.45);
+}
+.stButton button {
+  border: 1px solid rgba(0,255,255,.3);
+  box-shadow: 0 0 12px rgba(0,255,255,.25), inset 0 0 6px rgba(107,75,255,.35);
+  backdrop-filter: blur(4px);
+}
