@@ -23,8 +23,8 @@ def ensure_farm_state():
         ss.seed_inventory = {"HydroCorn": 8, "EcoMoss": 10, "LuxiBerry": 6}
     ss.setdefault("seed_max", {"HydroCorn": 25, "EcoMoss": 30, "LuxiBerry": 20})
     ss.setdefault("money", 5)  # starting credits
-    ss.setdefault("hunger_max", 200)
-    ss.setdefault("hunger", 200)
+    ss.setdefault("hunger_max", 300)
+    ss.setdefault("hunger", 300)
     ss.setdefault("day", 1)
     ss.setdefault("xp", 0)
     ss.setdefault("harvested_total", 0)
@@ -36,9 +36,9 @@ def ensure_farm_state():
     ss.setdefault("equipment_owned", {"fertilizer_lab": False, "greenhouse": False, "soil_filter": False})
     # Crop metadata
     ss.setdefault("CROPS", {
-        "HydroCorn": {"water_need": 2, "yield": 3, "price": 1, "grow_days": 4},
+        "HydroCorn": {"water_need": 2, "yield": 3, "price": 1, "grow_days": 2},
         "EcoMoss":   {"water_need": 1, "yield": 1, "price": 1, "grow_days": 3, "humidify": 0.2},
-        "LuxiBerry": {"water_need": 2, "yield": 1, "price": 4, "grow_days": 5}
+        "LuxiBerry": {"water_need": 2, "yield": 1, "price": 4, "grow_days": 4}
     })
     # Shop catalog (balanced costs)
     ss.setdefault("SHOP_ITEMS", {
@@ -177,11 +177,11 @@ def sidebar_actions():
             st.warning("Not ripe.")
 
     st.markdown('---')
-    if st.button("🍽️ Eat 1 (+15 hunger)"):
+    if st.button("🍽️ Eat 1 (+25 hunger)"):
         food = st.session_state.inventory.get("food",0)
         if food>0:
             st.session_state.inventory["food"] = food-1
-            st.session_state.hunger = min(100, st.session_state.hunger+15)
+            st.session_state.hunger = min(300, st.session_state.hunger+25)
             st.toast("Hunger restored")
         else:
             st.error("No food available.")
@@ -305,7 +305,33 @@ def _load_forecast_row():
             st.session_state.forecast_cache[region] = df
         if df.empty:
             return
-        row = df.sample(1, random_state=random.randint(0, 999999)).iloc[0]
+        
+        # Bias toward favorable conditions for easier gameplay
+        # Try to pick rows with better conditions when available
+        try:
+            # Look for columns that might contain favorable weather data
+            precip_col = None
+            soil_col = None
+            for col in df.columns:
+                if 'precip' in col.lower() or 'rain' in col.lower():
+                    precip_col = col
+                if 'soil' in col.lower() and 'water' in col.lower():
+                    soil_col = col
+            
+            # Filter for better weather if possible
+            if precip_col is not None and soil_col is not None:
+                good_weather = df[
+                    (df[precip_col] > 20) & (df[soil_col] > 60)
+                ]
+                if len(good_weather) > 5:  # Use good weather if available
+                    row = good_weather.sample(1, random_state=random.randint(0, 999999)).iloc[0]
+                else:
+                    row = df.sample(1, random_state=random.randint(0, 999999)).iloc[0]
+            else:
+                row = df.sample(1, random_state=random.randint(0, 999999)).iloc[0]
+        except:
+            row = df.sample(1, random_state=random.randint(0, 999999)).iloc[0]
+            
         # Attempt to map columns
         def find(col_keywords):
             for c in df.columns:
@@ -317,14 +343,32 @@ def _load_forecast_row():
         rain = find(["rain","precip"]) or 0.0
         temp = find(["temp"]) or 25
         drought = find(["drought","dry"]) or 0
+        
+        # Apply favorable bias to weather values
+        rain_val = float(rain) if isinstance(rain,(int,float)) else 0.0
+        rain_val = max(rain_val * 1.5, 0.0)  # Boost rain by 50%
+        
+        soil_val = float(soil) if isinstance(soil,(int,float)) else 50.0
+        soil_val = min(max(soil_val * 1.2, 60.0), 100.0)  # Boost soil moisture, min 60%
+        
+        temp_val = float(temp) if isinstance(temp,(int,float)) else 25
+        drought_val = max(int(drought) if isinstance(drought,(int,float)) else 0, 0)
+        drought_val = max(drought_val - 100, 0)  # Significantly reduce drought severity
+        
         st.session_state.weather_today = {
-            "temp": float(temp) if isinstance(temp,(int,float)) else 25,
-            "rain": float(rain) if isinstance(rain,(int,float)) else 0.0,
-            "drought": int(drought) if isinstance(drought,(int,float)) else 0,
-            "soil_moisture": float(soil) if isinstance(soil,(int,float)) else 0.4
+            "temp": temp_val,
+            "rain": rain_val,
+            "drought": drought_val,
+            "soil_moisture": soil_val / 100.0  # Convert to 0-1 range
         }
     except Exception:
-        pass
+        # Fallback to favorable default weather
+        st.session_state.weather_today = {
+            "temp": 25, 
+            "rain": 1.5, 
+            "drought": 0, 
+            "soil_moisture": 0.7
+        }
 
 def next_day():
     if st.session_state.get("game_over"):
@@ -335,7 +379,7 @@ def next_day():
         for j in range(5):
             _tick_cell(st.session_state.farm_grid[i][j])
     # Hunger decay
-        st.session_state.hunger = max(0, st.session_state.hunger - 8)
+    st.session_state.hunger = max(0, st.session_state.hunger - 5)
     # Rain to water conversion (B) - if rain high add inventory water
     rain_amount = st.session_state.weather_today.get("rain",0)
     if rain_amount >= 0.6:
