@@ -71,12 +71,12 @@ html = f"""
 st.markdown(html, unsafe_allow_html=True)
 
 if show_understand_btn:
-    if st.button("hiểu rồi", key="_understand_once"):
+    if st.button("Understood", key="_understand_once"):
         st.session_state.s3_1_understand_stage = min(stage + 1, len(STAGED_TEXTS) - 1)
         st.rerun()
 
 if show_stage_back_btn:
-    if st.button("Quay lại phần trước", key="_understand_back"):
+    if st.button("Back to the previous stage", key="_understand_back"):
         st.session_state.s3_1_understand_stage = max(stage - 1, 0)
         st.rerun()
 
@@ -111,8 +111,8 @@ st.markdown(
     function attempt(){
         const a = move('⬅️ Back','nav-btn-slot');
         const b = move('Continue ➡️','nav-btn-slot');
-    const c = move('hiểu rồi','progress-btn-slot');
-    const d = move('Quay lại phần trước','progress-btn-slot');
+    const c = move('Understood','progress-btn-slot');
+    const d = move('Back to the previous stage','progress-btn-slot');
     return a & b & (c||true) & (d||true);
     }
     if(!attempt()) tries.forEach(t=>setTimeout(attempt,t));
